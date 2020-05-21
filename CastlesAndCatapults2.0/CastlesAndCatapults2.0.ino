@@ -2,13 +2,13 @@
 #define PALE makeColorHSB(200,50,70)
 #define FORT makeColorHSB(90,255,255)
 #define dustblue makeColorHSB(115,255,255)
-#define burntyellow makeColorHSB(35,255,255)
 #define burntorange makeColorHSB(25,200,255)
 #define purple makeColorHSB(200,255,255)
 #define pink makeColorHSB(10,210,255)
 #define teal makeColorHSB(100,255,255)
 #define mint makeColorHSB(90,255,255)
 #define pastelpurple makeColorHSB(190,255,255)
+#define yellowy makeColorHSB(43,240,255)
 
 
 #define dimness 100
@@ -25,7 +25,7 @@ byte team=0;
 //team at [A], signalState at [C][D], blinkMode at [E][F]
 byte sendData= (team << 4)+(signalState << 2)+(blinkMode);
 
-Color teamColor[4]={dustblue, pastelpurple, burntorange, teal};
+Color teamColor[4]={pastelpurple,yellowy,teal,burntorange};
 byte ignoredFaces[6]={0,0,0,0,0,0};
 byte connectedFaces[6]={0,0,0,0,0,0}; //1 if fort nearby. then show pale if 1
 byte hp=HEALTH;
