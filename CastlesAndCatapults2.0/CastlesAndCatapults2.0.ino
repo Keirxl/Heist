@@ -12,7 +12,7 @@
 
 
 #define dimness 100
-#define DAMAGE_DURATION 200
+#define DAMAGE_DURATION 500
 
 enum signalStates {INERT,RESET,RESOLVE};
 byte signalState = INERT;
@@ -30,6 +30,7 @@ byte lastConnectedTeam=0;
 bool isDead=false;
 bool isTroops=false;
 Timer damageTimer;
+byte damageDim;
 
 void setup() {
   // put your setup code here, to run once:
@@ -51,6 +52,9 @@ void loop() {
 
   
   if(blinkMode==DEAD){
+    for(byte i=0;i<6;i++){
+      ignoredFaces[i]=1;
+    }
     captureDisplay();
   }else if(blinkMode==CATAPULT){
     teamSet();
@@ -86,7 +90,7 @@ void inertLoop() {
   }
 
   if(blinkMode==CATAPULT){
-    if(buttonDoubleClicked()){
+    if(buttonSingleClicked()){
         team++;
         if(team==4){
           team=0;
@@ -178,7 +182,8 @@ void castleDisplay(){
 }
 
 void damageDisplay(){
-  setColor(RED);
+  damageDim=damageTimer.getRemaining();
+  setColor(dim(RED,damageDim));
 }
 
 void teamSet(){
