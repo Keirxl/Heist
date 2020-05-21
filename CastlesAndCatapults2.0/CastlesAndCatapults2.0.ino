@@ -13,6 +13,8 @@
 
 #define dimness 100
 #define DAMAGE_DURATION 500
+#define CAPTURE_DURATION 200
+#define HEALTH 5
 
 enum signalStates {INERT,RESET,RESOLVE};
 byte signalState = INERT;
@@ -25,12 +27,15 @@ byte sendData= (team << 4)+(signalState << 2)+(blinkMode);
 Color teamColor[4]={dustblue, pastelpurple, burntorange, teal};
 byte ignoredFaces[6]={0,0,0,0,0,0};
 byte connectedFaces[6]={0,0,0,0,0,0}; //1 if fort nearby. then show pale if 1
-byte hp=4;
+byte hp=HEALTH;
 byte lastConnectedTeam=0;
 bool isDead=false;
 bool isTroops=false;
-Timer damageTimer;
 byte damageDim;
+byte captureFace=0;
+bool flipDirection=false;
+Timer damageTimer;
+Timer captureTimer;
 
 void setup() {
   // put your setup code here, to run once:
@@ -62,7 +67,7 @@ void loop() {
     if(!damageTimer.isExpired()){
       damageDisplay();
     }else{
-       castleDisplay();
+      castleDisplay();
     }
   }
   
@@ -137,7 +142,7 @@ void resetLoop() {
   signalState = RESOLVE;//I default to this at the start of the loop. Only if I see a problem does this not happen
 
   blinkMode=CASTLE;
-  hp=4;
+  hp=HEALTH;
   team=0;
 
   //look for neighbors who have not heard the RESET news
@@ -163,8 +168,19 @@ void resolveLoop() {
   }
 }
 
+
+
+//captured pieces spin
 void captureDisplay(){
+  if(captureTimer.isExpired()){
+    captureFace++;
+      if(captureFace==6){
+        captureFace=0;
+      } 
+    captureTimer.set(CAPTURE_DURATION);
+  }
   setColor(teamColor[lastConnectedTeam]);
+  setColorOnFace(dim(teamColor[lastConnectedTeam],90),captureFace);
 }
 
 void castleDisplay(){
