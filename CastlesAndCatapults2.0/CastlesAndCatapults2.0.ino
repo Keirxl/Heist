@@ -12,8 +12,9 @@
 
 
 #define dimness 100
-#define DAMAGE_DURATION 500
-#define CAPTURE_DURATION 200
+#define DAMAGE_DURATION 500 //time to flash on a hit
+#define DEAD_DURATION 50 //time to finish spin
+#define DEAD_WAIT 1750 //pause between spins
 #define HEALTH 5
 
 enum signalStates {INERT,RESET,RESOLVE};
@@ -32,10 +33,11 @@ byte lastConnectedTeam=0;
 bool isDead=false;
 bool isTroops=false;
 byte damageDim;
-byte captureFace=0;
+byte deadFace=0;
 bool flipDirection=false;
 Timer damageTimer;
-Timer captureTimer;
+Timer deadTimer;
+Timer deadWaitTimer;
 
 void setup() {
   // put your setup code here, to run once:
@@ -60,7 +62,7 @@ void loop() {
     for(byte i=0;i<6;i++){
       ignoredFaces[i]=1;
     }
-    captureDisplay();
+    deadDisplay();
   }else if(blinkMode==CATAPULT){
     teamSet();
   }else{
@@ -171,16 +173,21 @@ void resolveLoop() {
 
 
 //captured pieces spin
-void captureDisplay(){
-  if(captureTimer.isExpired()){
-    captureFace++;
-      if(captureFace==6){
-        captureFace=0;
-      } 
-    captureTimer.set(CAPTURE_DURATION);
+void deadDisplay(){
+  if(deadWaitTimer.isExpired()){
+    if(deadTimer.isExpired()){
+      deadFace++;
+        if(deadFace==6){
+          deadWaitTimer.set(DEAD_WAIT);
+          deadFace=0;
+        } 
+      deadTimer.set(DEAD_DURATION);
+    }
+    setColor(teamColor[lastConnectedTeam]);
+    setColorOnFace(dim(teamColor[lastConnectedTeam],150),deadFace);
+  }else{
+    setColor(teamColor[lastConnectedTeam]);
   }
-  setColor(teamColor[lastConnectedTeam]);
-  setColorOnFace(dim(teamColor[lastConnectedTeam],90),captureFace);
 }
 
 void castleDisplay(){
