@@ -1,19 +1,21 @@
 
-#define VAULT makeColorHSB(200,50,70)
-#define GOLD makeColorHSB(37,240,255)
+#define VAULT makeColorHSB(70,255,255) //walls
+#define GOLD makeColorHSB(200,50,70) //interior
+#define GOLDEN makeColorHSB(37,240,255)  //gold pieces
 #define dustblue makeColorHSB(115,255,255)
 #define burntorange makeColorHSB(25,200,255)
 #define purple makeColorHSB(200,255,255)
 #define pink makeColorHSB(10,210,255)
 #define teal makeColorHSB(100,255,255)
-#define mint makeColorHSB(70,255,255)
+#define mint makeColorHSB(80,255,255)
 #define pastelpurple makeColorHSB(190,255,255)
 #define yellowy makeColorHSB(43,240,255)
+#define PALE makeColorHSB(200,50,70)
 
 
 #define dimness 100
 #define DAMAGE_DURATION 500 //time to flash on a hit
-#define DEAD_DURATION 50 //time to finish spin
+#define DEAD_DURATION 100 //time to finish spin
 #define DEAD_WAIT 1750 //pause between spins
 #define HEALTH 5
 
@@ -25,7 +27,7 @@ byte team=0;
 //team at [A], signalState at [C][D], blinkMode at [E][F]
 byte sendData= (team << 4)+(signalState << 2)+(blinkMode);
 
-Color teamColor[4]={mint,pastelpurple,teal,burntorange};
+Color teamColor[4]={WHITE,pastelpurple,teal,burntorange};
 byte ignoredFaces[6]={0,0,0,0,0,0};
 byte connectedFaces[6]={0,0,0,0,0,0}; //1 if GOLD nearby. then show VAULT if 1
 byte hp=HEALTH;
@@ -183,10 +185,10 @@ void deadDisplay(){
         } 
       deadTimer.set(DEAD_DURATION);
     }
-    setColor(teamColor[lastConnectedTeam]);
-    setColorOnFace(dim(teamColor[lastConnectedTeam],150),deadFace);
+    setColor(GOLDEN);
+    setColorOnFace(teamColor[lastConnectedTeam],deadFace);
   }else{
-    setColor(teamColor[lastConnectedTeam]);
+    setColor(GOLDEN);
   }
 }
 
