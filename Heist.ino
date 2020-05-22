@@ -1,11 +1,11 @@
 
-#define VAULT makeColorHSB(70,255,255) //walls
+#define VAULT makeColorHSB(80,255,255) //walls
 #define GOLD makeColorHSB(200,50,70) //interior
 #define GOLDEN makeColorHSB(37,240,255)  //gold pieces
 #define dustblue makeColorHSB(115,255,255)
 #define burntorange makeColorHSB(25,200,255)
 #define purple makeColorHSB(200,255,255)
-#define pink makeColorHSB(10,210,255)
+#define pink makeColorHSB(240,235,255)
 #define teal makeColorHSB(100,255,255)
 #define mint makeColorHSB(80,255,255)
 #define pastelpurple makeColorHSB(190,255,255)
@@ -27,7 +27,7 @@ byte team=0;
 //team at [A], signalState at [C][D], blinkMode at [E][F]
 byte sendData= (team << 4)+(signalState << 2)+(blinkMode);
 
-Color teamColor[4]={WHITE,pastelpurple,teal,burntorange};
+Color teamColor[4]={WHITE,BLUE,teal,burntorange};
 byte ignoredFaces[6]={0,0,0,0,0,0};
 byte connectedFaces[6]={0,0,0,0,0,0}; //1 if GOLD nearby. then show VAULT if 1
 byte hp=HEALTH;
@@ -109,25 +109,27 @@ void inertLoop() {
   }
 
   // Look for Attackers Here
-  FOREACH_FACE(f){
-    if(!isValueReceivedOnFaceExpired(f)){//am i connected?
-       if(getBlinkMode(getLastValueReceivedOnFace(f))==THEIF){// to a THEIF?
-          if(ignoredFaces[f]==0){//not an ignored face
-            hp--;
-            damageTimer.set(DAMAGE_DURATION);
-            lastConnectedTeam=getTeam(getLastValueReceivedOnFace(f));
-            if(hp<1){
-              blinkMode=DEAD;
+  if(blinkMode==BANK){
+    FOREACH_FACE(f){
+      if(!isValueReceivedOnFaceExpired(f)){//am i connected?
+         if(getBlinkMode(getLastValueReceivedOnFace(f))==THEIF){// to a THEIF?
+            if(ignoredFaces[f]==0){//not an ignored face
+              hp--;
+              damageTimer.set(DAMAGE_DURATION);
+              lastConnectedTeam=getTeam(getLastValueReceivedOnFace(f));
+              if(hp<1){
+                blinkMode=DEAD;
+              }
             }
-          }
-       }
-       if(getBlinkMode(getLastValueReceivedOnFace(f))!=DEAD){
-        ignoredFaces[f]=1;
-       }
-    }else{
-      if(getBlinkMode(getLastValueReceivedOnFace(f))!=DEAD){
-        ignoredFaces[f]=0;
-       }
+         }
+         if(getBlinkMode(getLastValueReceivedOnFace(f))!=DEAD){
+          ignoredFaces[f]=1;
+         }
+      }else{
+        if(getBlinkMode(getLastValueReceivedOnFace(f))!=DEAD){
+          ignoredFaces[f]=0;
+         }
+      }
     }
   }
   
