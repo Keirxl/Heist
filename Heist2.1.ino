@@ -82,8 +82,9 @@ void loop() {
     if(!finalDamageTimer.isExpired()){
       finalDamageDisplay();
     }else{
-      victoryFace=0;
-      deadDisplay();
+      //victoryFace=0;
+      //deadDisplay();
+      deadSparkle();
     }
   }else if(blinkMode==THEIF){
     teamSet();
@@ -228,18 +229,35 @@ void deadDisplay(){
   }
 }
 
+void deadSparkle(){
+  if(sparkleTimer.isExpired()){
+    sparkleFace=random(5)+0;
+    sparkleBrightness=random(70)+150;
+    sparkleTimer.set(SPARKLE_DURATION);
+  }
+  if(sparkleFadeTimer.isExpired()){
+     sparkleBrightness+=10;
+     if(sparkleBrightness>244){
+        sparkleBrightness=random(70)+150;
+     }
+     sparkleFadeTimer.set(SPARKLE_FADE);
+  }
+  setColor(GOLDEN);
+  setColorOnFace(dim(teamColor[lastConnectedTeam],sparkleBrightness),sparkleFace);
+}
+
 
 //same as BANKdisplay but it wobbles to show its at half health
 void wobbleDisplay(){
   if(sparkleTimer.isExpired()){
     sparkleFace=random(5)+1;
-    sparkleBrightness=140;
+    sparkleBrightness=random(70)+150;
     sparkleTimer.set(SPARKLE_DURATION);
   }
   if(sparkleFadeTimer.isExpired()){
      sparkleBrightness+=10;
-     if(sparkleBrightness==255){
-        sparkleBrightness=140;
+     if(sparkleBrightness>244){
+        sparkleBrightness=random(70)+150;
      }
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
@@ -273,13 +291,13 @@ void wobbleDisplay(){
 void BANKDisplay(){
   if(sparkleTimer.isExpired()){
     sparkleFace=random(5)+1;
-    sparkleBrightness=140;
+    sparkleBrightness=random(70)+150;
     sparkleTimer.set(SPARKLE_DURATION);
   }
   if(sparkleFadeTimer.isExpired()){
      sparkleBrightness+=10;
-     if(sparkleBrightness==255){
-        sparkleBrightness=140;
+     if(sparkleBrightness>244){
+        sparkleBrightness=random(70)+150;
      }
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
@@ -293,7 +311,7 @@ void BANKDisplay(){
         if(getBlinkMode(getLastValueReceivedOnFace(f))==BANK){
             connectedFaces[f]=1;
             if(sparkleFace==f){
-                setColorOnFace(makeColorHSB(43,200,sparkleBrightness),sparkleFace);
+                setColorOnFace(makeColorHSB(43,220,sparkleBrightness),sparkleFace);
             }else{
               setColorOnFace(GOLDEN,f);
             }
