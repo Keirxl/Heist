@@ -14,7 +14,7 @@
 #define PALE makeColorHSB(200,50,70)
 
 
-#define dimness 100
+
 #define DAMAGE_DURATION 500 //time to flash on a hit
 #define DEAD_DURATION 90 //time to finish spin
 #define DEAD_WAIT 1500 //pause between spins
@@ -23,6 +23,7 @@
 #define VICTORY_LAP  50 //time for team to lap the gold piece
 #define SPARKLE_DURATION 1000
 #define SPARKLE_FADE 150
+#define PULSE_LENGTH 2000
 #define HEALTH 6
 
 enum signalStates {INERT,RESET,RESOLVE};
@@ -43,7 +44,7 @@ bool isTroops=false;
 byte damageDim;
 byte deadFace=0;
 byte sparkleFace;
-byte sparkleBrightness;
+byte sparkleSat;
 byte victoryFace=0;
 bool flipDirection=false;
 Timer damageTimer;
@@ -54,6 +55,7 @@ Timer victoryTimer;
 Timer wobbleTimer;
 Timer sparkleTimer;
 Timer sparkleFadeTimer;
+
 
 
 void setup() {
@@ -82,9 +84,10 @@ void loop() {
     if(!finalDamageTimer.isExpired()){
       finalDamageDisplay();
     }else{
-      //victoryFace=0;
+      victoryFace=0;
       //deadDisplay();
-      deadSparkle();
+      //deadSparkle();
+      setColor(GOLDEN);
     }
   }else if(blinkMode==THEIF){
     teamSet();
@@ -123,6 +126,7 @@ void inertLoop() {
     }
   }
 
+  //Change Teams
   if(blinkMode==THEIF){
     if(buttonDoubleClicked()){
       if(isAlone()){
@@ -134,6 +138,7 @@ void inertLoop() {
        }
     }
   }
+
 
   // Look for Attackers Here
   if(blinkMode==BANK){
@@ -229,21 +234,23 @@ void deadDisplay(){
   }
 }
 
+//makes dead pieces sparkle
 void deadSparkle(){
   if(sparkleTimer.isExpired()){
     sparkleFace=random(5)+0;
-    sparkleBrightness=random(70)+150;
+    sparkleSat=random(70)+150;
     sparkleTimer.set(SPARKLE_DURATION);
   }
   if(sparkleFadeTimer.isExpired()){
-     sparkleBrightness+=10;
-     if(sparkleBrightness>244){
-        sparkleBrightness=random(70)+150;
+     sparkleSat+=10;
+     if(sparkleSat>244){
+        sparkleSat=random(70)+150;
      }
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
-  setColor(GOLDEN);
-  setColorOnFace(dim(teamColor[lastConnectedTeam],sparkleBrightness),sparkleFace);
+    setColor(GOLDEN);
+    setColorOnFace(dim(teamColor[lastConnectedTeam],sparkleSat),sparkleFace);
+
 }
 
 
@@ -251,16 +258,25 @@ void deadSparkle(){
 void wobbleDisplay(){
   if(sparkleTimer.isExpired()){
     sparkleFace=random(5)+1;
-    sparkleBrightness=random(70)+150;
+    sparkleSat=random(50)+130;
     sparkleTimer.set(SPARKLE_DURATION);
   }
   if(sparkleFadeTimer.isExpired()){
-     sparkleBrightness+=10;
-     if(sparkleBrightness>244){
-        sparkleBrightness=random(70)+150;
+     sparkleSat+=10;
+     if(sparkleSat>244){
+        sparkleSat=random(50)+130;
      }
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
+
+  //get progress from 0 - MAX
+  int pulseProgress = millis() % PULSE_LENGTH;
+
+  //transform that progress to a byte (0-255)
+  byte pulseMapped = map(pulseProgress, 0, PULSE_LENGTH, 0, 255);
+
+  //transform that byte with sin
+  byte dimness = sin8_C(pulseMapped);
     
 
   if(isAlone()){
@@ -271,17 +287,17 @@ void wobbleDisplay(){
         if(getBlinkMode(getLastValueReceivedOnFace(f))==BANK){
             connectedFaces[f]=1;
             if(sparkleFace==f){
-                setColorOnFace(makeColorHSB(43,200,sparkleBrightness),sparkleFace);
+                setColorOnFace(makeColorHSB(43,200,sparkleSat),sparkleFace);
             }else{
               setColorOnFace(GOLDEN,f);
             }
         }else{
           connectedFaces[f]=0;
-          setColorOnFace(makeColorHSB(200,50,random(80) + 50),f);
+          setColorOnFace(dim(VAULT,dimness),f);
         }
       }else{
         connectedFaces[f]=0;
-        setColorOnFace(makeColorHSB(200,50,random(80) + 50),f);
+        setColorOnFace(dim(VAULT,dimness),f);
       }
     }
   }
@@ -291,13 +307,13 @@ void wobbleDisplay(){
 void BANKDisplay(){
   if(sparkleTimer.isExpired()){
     sparkleFace=random(5)+1;
-    sparkleBrightness=random(70)+150;
+    sparkleSat=random(50)+130;
     sparkleTimer.set(SPARKLE_DURATION);
   }
   if(sparkleFadeTimer.isExpired()){
-     sparkleBrightness+=10;
-     if(sparkleBrightness>244){
-        sparkleBrightness=random(70)+150;
+     sparkleSat+=10;
+     if(sparkleSat>244){
+        sparkleSat=random(50)+130;
      }
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
@@ -311,7 +327,7 @@ void BANKDisplay(){
         if(getBlinkMode(getLastValueReceivedOnFace(f))==BANK){
             connectedFaces[f]=1;
             if(sparkleFace==f){
-                setColorOnFace(makeColorHSB(43,220,sparkleBrightness),sparkleFace);
+                setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
             }else{
               setColorOnFace(GOLDEN,f);
             }
