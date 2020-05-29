@@ -60,7 +60,7 @@ Timer sparkleFadeTimer;
 
 void setup() {
   // put your setup code here, to run once:
-
+  hp=random(3)+3;
 }
 
 void loop() {
@@ -94,7 +94,7 @@ void loop() {
   }else{
     if(!damageTimer.isExpired()){
       damageDisplay();
-    }else if(hp<4){
+    }else if(hp<(hp/2)){
       wobbleDisplay();
     }else{
       BANKDisplay();
@@ -180,7 +180,8 @@ void resetLoop() {
   signalState = RESOLVE;//I default to this at the start of the loop. Only if I see a problem does this not happen
 
   blinkMode=BANK;
-  hp=HEALTH;
+  //hp=HEALTH;
+  hp=random(3)+3;
   team=0;
 
   //look for neighbors who have not heard the RESET news
