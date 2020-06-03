@@ -19,10 +19,11 @@
 
 
 #define DAMAGE_DURATION 500 //time to flash on a hit
-#define DEAD_DURATION 90 //time to finish spin
+#define DEAD_DURATION 120 //time to finish spin
 #define DEAD_WAIT 1500 //pause between spins
 #define FINAL_DAMAGE_DURATION 1500
-#define WOBBLE_DURATION 500
+#define WOBBLE_DURATION 100
+#define BREATH_DURATION 200
 #define VICTORY_LAP  50 //time for team to lap the gold piece
 #define SPARKLE_DURATION 1000
 #define SPARKLE_FADE 150
@@ -43,12 +44,14 @@ byte connectedFaces[6]={0,0,0,0,0,0}; //1 if attached
 byte hp=HEALTH;
 byte lastConnectedTeam=0;
 bool isDead=false;
+bool isDecrease=false;
 bool isTroops=false;
 byte damageDim;
 byte deadFace=0;
 byte sparkleFace;
 byte sparkleSat;
 byte victoryFace=0;
+byte dimness;
 bool flipDirection=false;
 Timer damageTimer;
 Timer deadTimer; //for Dead Display
@@ -61,9 +64,9 @@ Timer sparkleFadeTimer;
 
 
 
+
 void setup() {
   // put your setup code here, to run once:
-  hp=random(3)+3;
 }
 
 void loop() {
@@ -88,16 +91,16 @@ void loop() {
       finalDamageDisplay();
     }else{
       victoryFace=0;
-      //deadDisplay();
+      deadDisplay();
       //deadSparkle();
-      setColor(GOLDEN);
+      //setColor(GOLDEN);
     }
   }else if(blinkMode==THEIF){
     teamSet();
   }else{
     if(!damageTimer.isExpired()){
       damageDisplay();
-    }else if(hp<(hp/2)){
+    }else if(hp<(HEALTH/2)+1){
       wobbleDisplay();
     }else{
       BANKDisplay();
@@ -183,8 +186,8 @@ void resetLoop() {
   signalState = RESOLVE;//I default to this at the start of the loop. Only if I see a problem does this not happen
 
   blinkMode=BANK;
-  //hp=HEALTH;
-  hp=random(3)+3;
+  hp=HEALTH;
+  //hp=random(3)+3;
   team=0;
 
   //look for neighbors who have not heard the RESET news
@@ -227,7 +230,7 @@ void deadDisplay(){
       setColor(GOLDEN);
       setColorOnFace(teamColor[lastConnectedTeam],deadFace%6);
       deadFace++;
-        if(deadFace==19){
+        if(deadFace==13){
           deadWaitTimer.set(DEAD_WAIT);
           deadFace=0;
         }
@@ -273,14 +276,21 @@ void wobbleDisplay(){
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
 
-  //get progress from 0 - MAX
-  int pulseProgress = millis() % PULSE_LENGTH;
-
-  //transform that progress to a byte (0-255)
-  byte pulseMapped = map(pulseProgress, 0, PULSE_LENGTH, 0, 255);
-
-  //transform that byte with sin
-  byte dimness = sin8_C(pulseMapped);
+  if(wobbleTimer.isExpired()){
+    if(!isDecrease){
+      dimness+=15;
+    }else{
+      dimness-=15;
+    }
+    if(dimness>180){
+      dimness=180;
+      isDecrease=true;
+    }else if(dimness<90){
+      dimness=90;
+      isDecrease=false;
+    }
+    wobbleTimer.set(WOBBLE_DURATION);
+  }
     
 
   if(isAlone()){
@@ -297,11 +307,11 @@ void wobbleDisplay(){
             }
         }else{
           connectedFaces[f]=0;
-          setColorOnFace(dim(VAULT,dimness),f);
+          setColorOnFace(makeColorHSB(200,50,dimness),f);
         }
       }else{
         connectedFaces[f]=0;
-        setColorOnFace(dim(VAULT,dimness),f);
+        setColorOnFace(makeColorHSB(200,50,dimness),f);
       }
     }
   }
@@ -353,7 +363,22 @@ void damageDisplay(){
 }
 
 void teamSet(){
-  setColor(teamColor[team]);
+  if(wobbleTimer.isExpired()){
+    if(!isDecrease){
+      dimness+=10;
+    }else{
+      dimness-=10;
+    }
+    if(dimness>249){
+      dimness=249;
+      isDecrease=true;
+    }else if(dimness<200){
+      dimness=200;
+      isDecrease=false;
+    }
+    wobbleTimer.set(BREATH_DURATION);
+  }
+  setColor(dim(teamColor[team],dimness));
 }
 
 //team at [A], signalState at [C][D], blinkMode at [E][F]
