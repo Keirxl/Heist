@@ -1,4 +1,6 @@
 
+//a change
+
 #define VAULT makeColorHSB(200,50,70) //walls
 #define GOLD makeColorHSB(200,50,70) //interior
 #define GOLDEN makeColorHSB(37,240,255)  //gold pieces
