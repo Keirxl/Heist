@@ -276,21 +276,7 @@ void wobbleDisplay(){
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
 
-  if(wobbleTimer.isExpired()){
-    if(!isDecrease){
-      dimness+=15;
-    }else{
-      dimness-=15;
-    }
-    if(dimness>180){
-      dimness=180;
-      isDecrease=true;
-    }else if(dimness<90){
-      dimness=90;
-      isDecrease=false;
-    }
-    wobbleTimer.set(WOBBLE_DURATION);
-  }
+  breathe(180,90,WOBBLE_DURATION);
     
 
   if(isAlone()){
@@ -326,8 +312,8 @@ void BANKDisplay(){
   }
   if(sparkleFadeTimer.isExpired()){
      sparkleSat+=10;
-     if(sparkleSat>244){
-        sparkleSat=random(50)+130;
+     if(sparkleSat>255){
+        sparkleSat=random(55)+140;
      }
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
@@ -363,22 +349,26 @@ void damageDisplay(){
 }
 
 void teamSet(){
+  breathe(249,200,BREATH_DURATION);
+  setColor(dim(teamColor[team],dimness));
+}
+
+void breathe(byte high, byte low, byte duration){
   if(wobbleTimer.isExpired()){
     if(!isDecrease){
       dimness+=10;
     }else{
       dimness-=10;
     }
-    if(dimness>249){
-      dimness=249;
+    if(dimness>high){
+      dimness=high;
       isDecrease=true;
-    }else if(dimness<200){
-      dimness=200;
+    }else if(dimness<low){
+      dimness=low;
       isDecrease=false;
     }
-    wobbleTimer.set(BREATH_DURATION);
+    wobbleTimer.set(duration);
   }
-  setColor(dim(teamColor[team],dimness));
 }
 
 //team at [A], signalState at [C][D], blinkMode at [E][F]
