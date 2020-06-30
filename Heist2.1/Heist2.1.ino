@@ -1,6 +1,5 @@
 //  __Heist__
-//  by Keir Williams with help by Move38's Dan King
-//  
+
 
 #define VAULT makeColorHSB(200,50,70) //walls
 #define GOLD makeColorHSB(200,50,70) //interior
