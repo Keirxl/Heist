@@ -21,13 +21,13 @@
 #define DEAD_DURATION 120 //time to finish spin
 #define DEAD_WAIT 1500 //pause between spins
 #define FINAL_DAMAGE_DURATION 1500
-#define WOBBLE_DURATION 100
+#define WOBBLE_DURATION 75
 #define BREATH_DURATION 200
 #define VICTORY_LAP  50 //time for team to lap the gold piece
 #define SPARKLE_DURATION 1000
 #define SPARKLE_FADE 150
 #define PULSE_LENGTH 2000
-#define HEALTH 6
+#define HEALTH 4
 
 enum signalStates {INERT,RESET,RESOLVE};
 byte signalState = INERT;
@@ -66,6 +66,7 @@ Timer sparkleFadeTimer;
 
 void setup() {
   // put your setup code here, to run once:
+  randomize();
 }
 
 void loop() {
@@ -99,7 +100,7 @@ void loop() {
   }else{
     if(!damageTimer.isExpired()){
       damageDisplay();
-    }else if(hp<(HEALTH/2)+1){
+    }else if(hp<=HEALTH/2){
       wobbleDisplay();
     }else{
       BANKDisplay();
@@ -275,7 +276,7 @@ void wobbleDisplay(){
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
 
-  breathe(180,90,WOBBLE_DURATION);
+  breathe(180,60,WOBBLE_DURATION);
     
 
   if(isAlone()){
@@ -292,11 +293,11 @@ void wobbleDisplay(){
             }
         }else{
           connectedFaces[f]=0;
-          setColorOnFace(makeColorHSB(200,50,dimness),f);
+          setColorOnFace(makeColorHSB(200,50,random(180-dimness)+dimness),f);
         }
       }else{
         connectedFaces[f]=0;
-        setColorOnFace(makeColorHSB(200,50,dimness),f);
+        setColorOnFace(makeColorHSB(200,50,random(180-dimness)+dimness),f);
       }
     }
   }
