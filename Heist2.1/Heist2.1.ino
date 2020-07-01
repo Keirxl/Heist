@@ -264,14 +264,14 @@ void deadSparkle(){
 //same as BANKdisplay but it wobbles to show its at half health
 void wobbleDisplay(){
   if(sparkleTimer.isExpired()){
-    sparkleFace=random(5)+1;
-    sparkleSat=random(50)+130;
-    sparkleTimer.set(SPARKLE_DURATION);
+    sparkleFace=random(60)%6;
+    sparkleSat=random(40)+100;
+    sparkleTimer.set(random(300)+900);
   }
   if(sparkleFadeTimer.isExpired()){
      sparkleSat+=10;
      if(sparkleSat>244){
-        sparkleSat=random(50)+130;
+        sparkleSat=random(40)+100;
      }
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
@@ -280,14 +280,14 @@ void wobbleDisplay(){
     
 
   if(isAlone()){
-    setColor(GOLDEN);
+    setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
   }else{
     FOREACH_FACE(f){
       if(!isValueReceivedOnFaceExpired(f)){
         if(getBlinkMode(getLastValueReceivedOnFace(f))==BANK){
             connectedFaces[f]=1;
             if(sparkleFace==f){
-                setColorOnFace(makeColorHSB(43,200,sparkleSat),sparkleFace);
+                setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
             }else{
               setColorOnFace(GOLDEN,f);
             }
@@ -306,21 +306,21 @@ void wobbleDisplay(){
 
 void BANKDisplay(){
   if(sparkleTimer.isExpired()){
-    sparkleFace=random(5)+1;
-    sparkleSat=random(50)+130;
-    sparkleTimer.set(SPARKLE_DURATION);
+    sparkleFace=random(60)%6;
+    sparkleSat=random(40)+100;
+    sparkleTimer.set(random(300)+900);
   }
   if(sparkleFadeTimer.isExpired()){
      sparkleSat+=10;
      if(sparkleSat>255){
-        sparkleSat=random(55)+140;
+        sparkleSat=random(40)+100;
      }
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
     
 
   if(isAlone()){
-    setColor(GOLDEN);
+    setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
   }else{
     FOREACH_FACE(f){
       if(!isValueReceivedOnFaceExpired(f)){
