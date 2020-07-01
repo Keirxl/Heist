@@ -4,6 +4,7 @@
 #define VAULT makeColorHSB(200,50,70) //walls
 #define GOLD makeColorHSB(200,50,70) //interior
 #define GOLDEN makeColorHSB(37,240,255)  //gold pieces
+#define GOLDHUE 37
 #define dustblue makeColorHSB(115,255,255)
 #define burntorange makeColorHSB(25,200,255)
 #define purple makeColorHSB(200,255,255)
@@ -279,15 +280,16 @@ void wobbleDisplay(){
   breathe(180,60,WOBBLE_DURATION);
     
 
-  if(isAlone()){
-    setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
+  if(noBanksAround()){
+    setColor(makeColorHSB(GOLDHUE,240,255));
+    setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
   }else{
     FOREACH_FACE(f){
       if(!isValueReceivedOnFaceExpired(f)){
         if(getBlinkMode(getLastValueReceivedOnFace(f))==BANK){
             connectedFaces[f]=1;
             if(sparkleFace==f){
-                setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
+                setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
             }else{
               setColorOnFace(GOLDEN,f);
             }
@@ -319,15 +321,16 @@ void BANKDisplay(){
   }
     
 
-  if(isAlone()){
-    setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
+  if(noBanksAround()){
+    setColor(makeColorHSB(GOLDHUE,240,255));
+    setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
   }else{
     FOREACH_FACE(f){
       if(!isValueReceivedOnFaceExpired(f)){
         if(getBlinkMode(getLastValueReceivedOnFace(f))==BANK){
             connectedFaces[f]=1;
             if(sparkleFace==f){
-                setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
+                setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
             }else{
               setColorOnFace(GOLDEN,f);
             }
@@ -368,6 +371,22 @@ void breathe(byte high, byte low, byte duration){
       isDecrease=false;
     }
     wobbleTimer.set(duration);
+  }
+}
+
+bool noBanksAround(){
+  byte bankNeighbors=0;
+  FOREACH_FACE(f){
+    if (!isValueReceivedOnFaceExpired(f)) {//a neighbor!
+      if (getBlinkMode(getLastValueReceivedOnFace(f)) == BANK) {
+        bankNeighbors++;
+      }
+    }
+  }
+  if(bankNeighbors==0){
+    return true;
+  }else{
+    return false;
   }
 }
 
