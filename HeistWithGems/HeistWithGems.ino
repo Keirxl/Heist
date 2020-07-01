@@ -289,8 +289,7 @@ void wobbleDisplay(){
   if(sparkleTimer.isExpired()){
     sparkleFace=random(60)%6;
     sparkleSat=random(40)+100;
-    sparkleTime=random(100)+1000;
-    sparkleTimer.set(sparkleTime);
+    sparkleTimer.set(random(100)+1000);
   }
   if(sparkleFadeTimer.isExpired()){
      sparkleSat+=10;
@@ -346,8 +345,7 @@ void BANKDisplay(){
   if(sparkleTimer.isExpired()){
     sparkleFace=random(60)%6;
     sparkleSat=random(40)+100;
-    sparkleTime=1000;
-    sparkleTimer.set(sparkleTime);
+    sparkleTimer.set(random(300)+900);
   }
   if(sparkleFadeTimer.isExpired()){
      sparkleSat+=10;
