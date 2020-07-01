@@ -81,7 +81,7 @@ void setup() {
   // put your setup code here, to run once:
   randomize();
   isGonnaBeGem = random(100);
-  if(isGonnaBeGem<=30){
+  if(isGonnaBeGem<=25){
     isGem=true;
   }else{
     isGem=false;
@@ -209,7 +209,7 @@ void resetLoop() {
   //hp=random(3)+3;
   team=0;
   isGonnaBeGem = random(100);
-  if(isGonnaBeGem<=30){
+  if(isGonnaBeGem<=25){
     isGem=true;
   }else{
     isGem=false;
