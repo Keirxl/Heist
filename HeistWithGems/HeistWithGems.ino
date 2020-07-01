@@ -5,6 +5,7 @@
 #define VAULT makeColorHSB(200,50,70) //walls
 #define GOLD makeColorHSB(200,50,70) //interior
 #define GOLDEN makeColorHSB(37,240,255)  //gold pieces
+#define GOLDHUE 37 //Gold hue
 #define dustblue makeColorHSB(115,255,255)
 #define burntorange makeColorHSB(25,200,255)
 #define purple makeColorHSB(200,255,255)
@@ -289,7 +290,7 @@ void wobbleDisplay(){
   if(sparkleTimer.isExpired()){
     sparkleFace=random(60)%6;
     sparkleSat=random(40)+100;
-    sparkleTimer.set(random(100)+1000);
+    sparkleTimer.set(random(300)+900);
   }
   if(sparkleFadeTimer.isExpired()){
      sparkleSat+=10;
@@ -302,10 +303,10 @@ void wobbleDisplay(){
   breathe(180,60,WOBBLE_DURATION);
     
 
-  if(isAlone()){
+  if(noBanksAround()){
     if(!isGem){
-      setColor(makeColorHSB(43,255,255));
-      setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
+      setColor(makeColorHSB(GOLDHUE,240,255));
+      setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
     }else{
       setColor(makeColorHSB(gemHue,255,255));
       setColorOnFace(makeColorHSB(gemHue,sparkleSat,255),sparkleFace);
@@ -317,7 +318,7 @@ void wobbleDisplay(){
             connectedFaces[f]=1;
             if(sparkleFace==f){
               if(!isGem){
-                setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
+                setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
               }else{
                 setColorOnFace(makeColorHSB(gemHue,sparkleSat,255),sparkleFace);
               }
@@ -356,16 +357,16 @@ void BANKDisplay(){
   }
     
 
-  if(isAlone()){
-    setColor(makeColorHSB(43,255,255));
-    setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
+  if(noBanksAround()){
+    setColor(makeColorHSB(GOLDHUE,240,255));
+    setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
   }else{
     FOREACH_FACE(f){
       if(!isValueReceivedOnFaceExpired(f)){
         if(getBlinkMode(getLastValueReceivedOnFace(f))==BANK){
             connectedFaces[f]=1;
             if(sparkleFace==f){
-                setColorOnFace(makeColorHSB(43,sparkleSat,255),sparkleFace);
+                setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
             }else{
               setColorOnFace(GOLDEN,f);
             }
@@ -406,6 +407,22 @@ void breathe(byte high, byte low, byte duration){
       isDecrease=false;
     }
     wobbleTimer.set(duration);
+  }
+}
+
+bool noBanksAround(){
+  byte bankNeighbors=0;
+  FOREACH_FACE(f){
+    if (!isValueReceivedOnFaceExpired(f)) {//a neighbor!
+      if (getBlinkMode(getLastValueReceivedOnFace(f)) == BANK) {
+        bankNeighbors++;
+      }
+    }
+  }
+  if(bankNeighbors==0){
+    return true;
+  }else{
+    return false;
   }
 }
 
