@@ -1,6 +1,7 @@
 //  __Heist__
 
 
+//COLORS 
 #define VAULT makeColorHSB(200,50,70) //walls
 #define GOLD makeColorHSB(200,50,70) //interior
 #define GOLDEN makeColorHSB(37,240,255)  //gold pieces
@@ -17,7 +18,7 @@
 #define PALE makeColorHSB(200,50,70)
 
 
-
+//TOO MANY VARIABLES 
 #define DAMAGE_DURATION 500 //time to flash on a hit
 #define DEAD_DURATION 120 //time to finish spin
 #define DEAD_WAIT 1500 //pause between spins
@@ -30,29 +31,28 @@
 #define PULSE_LENGTH 2000
 #define HEALTH 4
 
+//SIGNALS AND ENUMS AND STATE CHANGE OH MY!
 enum signalStates {INERT,RESET,RESOLVE};
 byte signalState = INERT;
 enum blinkModes {BANK,THEIF,DEAD};
 byte blinkMode=BANK;
 byte team=0;
-//team at [A], signalState at [C][D], blinkMode at [E][F]
-byte sendData= (team << 4)+(signalState << 2)+(blinkMode);
 
+
+//BYTES (and colors)
 Color teamColor[4]={teal,WHITE,mint,burntorange};
 byte ignoredFaces[6]={0,0,0,0,0,0};
 byte connectedFaces[6]={0,0,0,0,0,0}; //1 if attached
 byte hp=HEALTH;
 byte lastConnectedTeam=0;
-bool isDead=false;
-bool isDecrease=false;
-bool isTroops=false;
 byte damageDim;
 byte deadFace=0;
 byte sparkleFace;
 byte sparkleSat;
 byte victoryFace=0;
 byte dimness;
-bool flipDirection=false;
+
+//TIMERS 
 Timer damageTimer;
 Timer deadTimer; //for Dead Display
 Timer deadWaitTimer; //for Dead Display
@@ -61,6 +61,12 @@ Timer victoryTimer;
 Timer wobbleTimer;
 Timer sparkleTimer;
 Timer sparkleFadeTimer;
+
+//BOOLEANS BABY!
+bool isDead=false;
+bool isDecrease=false;
+bool isTroops=false;
+bool flipDirection=false;
 
 
 
@@ -242,24 +248,6 @@ void deadDisplay(){
   }
 }
 
-//makes dead pieces sparkle
-void deadSparkle(){
-  if(sparkleTimer.isExpired()){
-    sparkleFace=random(5)+0;
-    sparkleSat=random(70)+150;
-    sparkleTimer.set(SPARKLE_DURATION);
-  }
-  if(sparkleFadeTimer.isExpired()){
-     sparkleSat+=10;
-     if(sparkleSat>244){
-        sparkleSat=random(70)+150;
-     }
-     sparkleFadeTimer.set(SPARKLE_FADE);
-  }
-    setColor(GOLDEN);
-    setColorOnFace(dim(teamColor[lastConnectedTeam],sparkleSat),sparkleFace);
-
-}
 
 
 //same as BANKdisplay but it wobbles to show its at half health
