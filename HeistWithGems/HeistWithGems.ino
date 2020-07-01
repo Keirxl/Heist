@@ -251,8 +251,13 @@ void finalDamageDisplay(){
 void deadDisplay(){
   if(deadWaitTimer.isExpired()){
     if(deadTimer.isExpired()){
-      setColor(GOLDEN);
-      setColorOnFace(teamColor[lastConnectedTeam],deadFace%6);
+      if(!isGem){
+        setColor(GOLDEN);
+        setColorOnFace(teamColor[lastConnectedTeam],deadFace%6);
+      }else{
+        setColor(makeColorHSB(gemHue,255,255));
+        setColorOnFace(teamColor[lastConnectedTeam],deadFace%6);
+      }
       deadFace++;
         if(deadFace==13){
           deadWaitTimer.set(DEAD_WAIT);
@@ -261,28 +266,14 @@ void deadDisplay(){
       deadTimer.set(DEAD_DURATION);
     }
   }else{
-    setColor(GOLDEN);
+    if(!isGem){
+      setColor(GOLDEN);
+    }else{
+      setColor(makeColorHSB(gemHue,255,255));
+    }
   }
 }
 
-//makes dead pieces sparkle
-void deadSparkle(){
-  if(sparkleTimer.isExpired()){
-    sparkleFace=random(5)+0;
-    sparkleSat=random(70)+150;
-    sparkleTimer.set(SPARKLE_DURATION);
-  }
-  if(sparkleFadeTimer.isExpired()){
-     sparkleSat+=10;
-     if(sparkleSat>244){
-        sparkleSat=random(70)+150;
-     }
-     sparkleFadeTimer.set(SPARKLE_FADE);
-  }
-    setColor(GOLDEN);
-    setColorOnFace(dim(teamColor[lastConnectedTeam],sparkleSat),sparkleFace);
-
-}
 
 
 //same as BANKdisplay but it wobbles to show its at half health
@@ -300,7 +291,7 @@ void wobbleDisplay(){
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
 
-  breathe(180,60,WOBBLE_DURATION);
+  breathe(120,35,WOBBLE_DURATION);  
     
 
   if(noBanksAround()){
@@ -331,11 +322,11 @@ void wobbleDisplay(){
             }
         }else{
           connectedFaces[f]=0;
-          setColorOnFace(makeColorHSB(200,50,random(180-dimness)+dimness),f);
+          setColorOnFace(makeColorHSB(200,50,random(120-dimness)+dimness),f);
         }
       }else{
         connectedFaces[f]=0;
-        setColorOnFace(makeColorHSB(200,50,random(180-dimness)+dimness),f);
+        setColorOnFace(makeColorHSB(200,50,random(120-dimness)+dimness),f);
       }
     }
   }
