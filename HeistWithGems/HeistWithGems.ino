@@ -1,5 +1,6 @@
 //  __Heist__
 // WITH GEMS
+// GOLD<GEMS<BOTH
 
 
 #define VAULT makeColorHSB(200,50,70) //walls
