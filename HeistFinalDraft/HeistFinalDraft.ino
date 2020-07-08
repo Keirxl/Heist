@@ -1,20 +1,22 @@
-//  __Heist__
+//________________________________________________________________________________
+//   Heist
+//         by Keir Williams
+//            With help from Move38 (Thanks to Dan King!)
+//
+//                                                        I... kill the bus driver
+//_________________________________________________________________________________
+
+
+
 
 
 //COLORS 
 #define VAULT makeColorHSB(200,50,70) //walls
-#define GOLD makeColorHSB(200,50,70) //interior
 #define GOLDEN makeColorHSB(37,240,255)  //gold pieces
 #define GOLDHUE 37
-#define dustblue makeColorHSB(115,255,255)
 #define burntorange makeColorHSB(25,200,255)
-#define purple makeColorHSB(200,255,255)
-#define pink makeColorHSB(240,235,255)
 #define teal makeColorHSB(100,255,255)
-#define mint makeColorHSB(80,220,255)
-#define pastelpurple makeColorHSB(190,255,255)
-#define yellowy makeColorHSB(43,240,255)
-#define shimmer 43
+#define mint makeColorHSB(75,220,255)
 #define PALE makeColorHSB(200,50,70)
 
 
@@ -24,12 +26,12 @@
 #define DEAD_WAIT 1500 //pause between spins
 #define FINAL_DAMAGE_DURATION 1500
 #define WOBBLE_DURATION 75
-#define BREATH_DURATION 200
 #define VICTORY_LAP  50 //time for team to lap the gold piece
 #define SPARKLE_DURATION 1000
 #define SPARKLE_FADE 150
 #define PULSE_LENGTH 2000
 #define HEALTH 4
+#define PERIOD 2500
 
 //SIGNALS AND ENUMS AND STATE CHANGE OH MY!
 enum signalStates {INERT,RESET,RESOLVE};
@@ -43,6 +45,7 @@ byte team=0;
 Color teamColor[4]={teal,WHITE,mint,burntorange};
 byte ignoredFaces[6]={0,0,0,0,0,0};
 byte connectedFaces[6]={0,0,0,0,0,0}; //1 if attached
+byte theifOffFace=0;
 byte hp=HEALTH;
 byte lastConnectedTeam=0;
 byte damageDim;
@@ -116,6 +119,9 @@ void loop() {
   
   byte sendData= (team << 4)+(signalState << 2)+(blinkMode);
   setValueSentOnAllFaces(sendData);
+
+  buttonLongPressed();
+  buttonDoubleClicked();
 }
 
 
@@ -131,16 +137,24 @@ void inertLoop() {
   }
 
   // Turn me into a THEIF
-  if(buttonLongPressed()){
-    if(isAlone()){
-      blinkMode=THEIF;
-      team=0;
-      teamSet();
+  if(blinkMode!=THEIF){
+    if(buttonLongPressed()){
+      if(isAlone()){
+        blinkMode=THEIF;
+        team=0;
+        teamSet();
+      }
     }
   }
 
   //Change Teams
   if(blinkMode==THEIF){
+    if(buttonSingleClicked()){
+      theifOffFace++;
+      if(theifOffFace>5){
+        theifOffFace=0;
+      }
+    }
     if(buttonDoubleClicked()){
       if(isAlone()){
           team++;
@@ -151,6 +165,15 @@ void inertLoop() {
        }
     }
   }
+    if(blinkMode==THEIF){
+      if(buttonLongPressed()){
+        if(isAlone()){
+          blinkMode=BANK;
+          hp=HEALTH;
+        }
+      }
+    }
+  
 
 
   // Look for Attackers Here
@@ -265,7 +288,7 @@ void wobbleDisplay(){
      sparkleFadeTimer.set(SPARKLE_FADE);
   }
 
-  breathe(180,60,WOBBLE_DURATION);
+  breathe(70,180); 
     
 
   if(noBanksAround()){
@@ -340,26 +363,14 @@ void damageDisplay(){
 }
 
 void teamSet(){
-  breathe(249,200,BREATH_DURATION);
+  breathe(180,255);
   setColor(dim(teamColor[team],dimness));
+  setColorOnFace(OFF,theifOffFace);
 }
 
-void breathe(byte high, byte low, byte duration){
-  if(wobbleTimer.isExpired()){
-    if(!isDecrease){
-      dimness+=10;
-    }else{
-      dimness-=10;
-    }
-    if(dimness>high){
-      dimness=high;
-      isDecrease=true;
-    }else if(dimness<low){
-      dimness=low;
-      isDecrease=false;
-    }
-    wobbleTimer.set(duration);
-  }
+void breathe(byte low, byte high){
+  byte breathProgress = map(millis()%PERIOD,0,PERIOD,0,255);
+  dimness = map(sin8_C(breathProgress),0,255,low,high);
 }
 
 bool noBanksAround(){
