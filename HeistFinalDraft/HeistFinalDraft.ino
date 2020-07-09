@@ -3,11 +3,12 @@
 //         by Keir Williams
 //            With help from Move38 (Thanks to Dan King!)
 //
-//                                                        I... kill the bus driver
+//                                                        I.. kill.. the bus driver
 //_________________________________________________________________________________
 
 
-
+#define IMPACT_TIME 1500
+#define RIPPLE_TIME 90
 
 
 //COLORS 
@@ -54,6 +55,9 @@ byte sparkleFace;
 byte sparkleSat;
 byte victoryFace=0;
 byte dimness;
+byte impactFace;
+byte nextFace=0;
+byte complimentFace=4;
 
 //TIMERS 
 Timer damageTimer;
@@ -64,6 +68,8 @@ Timer victoryTimer;
 Timer wobbleTimer;
 Timer sparkleTimer;
 Timer sparkleFadeTimer;
+Timer impactTimer;
+Timer rippleTimer;
 
 //BOOLEANS BABY!
 bool isDead=false;
@@ -108,8 +114,8 @@ void loop() {
   }else if(blinkMode==THEIF){
     teamSet();
   }else{
-    if(!damageTimer.isExpired()){
-      damageDisplay();
+    if(!impactTimer.isExpired()){
+      impactDisplay();
     }else if(hp<=HEALTH/2){
       wobbleDisplay();
     }else{
@@ -183,7 +189,12 @@ void inertLoop() {
          if(getBlinkMode(getLastValueReceivedOnFace(f))==THEIF){// to a THEIF?
             if(ignoredFaces[f]==0){//not an ignored face
               hp--;
-              damageTimer.set(DAMAGE_DURATION);
+              //damageTimer.set(DAMAGE_DURATION);
+              impactTimer.set(IMPACT_TIME);
+              rippleTimer.set(RIPPLE_TIME);
+              impactFace=f;
+              nextFace=0;
+              complimentFace=4;
               lastConnectedTeam=getTeam(getLastValueReceivedOnFace(f));
               if(hp<1){
                 finalDamageTimer.set(FINAL_DAMAGE_DURATION);
@@ -242,35 +253,6 @@ void resolveLoop() {
     }
   }
 }
-
-
-void finalDamageDisplay(){
-    if(victoryTimer.isExpired()){
-      victoryFace++;
-      victoryTimer.set(VICTORY_LAP);
-    }
-  setColor(dim(teamColor[lastConnectedTeam],70));
-  setColorOnFace(teamColor[lastConnectedTeam],victoryFace%6);
-}
-
-//captured pieces spin
-void deadDisplay(){
-  if(deadWaitTimer.isExpired()){
-    if(deadTimer.isExpired()){
-      setColor(GOLDEN);
-      setColorOnFace(teamColor[lastConnectedTeam],deadFace%6);
-      deadFace++;
-        if(deadFace==13){
-          deadWaitTimer.set(DEAD_WAIT);
-          deadFace=0;
-        }
-      deadTimer.set(DEAD_DURATION);
-    }
-  }else{
-    setColor(GOLDEN);
-  }
-}
-
 
 
 //same as BANKdisplay but it wobbles to show its at half health
@@ -366,6 +348,7 @@ void teamSet(){
   breathe(180,255);
   setColor(dim(teamColor[team],dimness));
   setColorOnFace(OFF,theifOffFace);
+  setColorOnFace(OFF,(theifOffFace+3)%6);
 }
 
 void breathe(byte low, byte high){
@@ -388,6 +371,73 @@ bool noBanksAround(){
     return false;
   }
 }
+
+
+void finalDamageDisplay(){
+    if(victoryTimer.isExpired()){
+      victoryFace++;
+      victoryTimer.set(VICTORY_LAP);
+    }
+  setColor(dim(teamColor[lastConnectedTeam],70));
+  setColorOnFace(teamColor[lastConnectedTeam],victoryFace%6);
+}
+
+//captured pieces spin
+void deadDisplay(){
+  if(deadWaitTimer.isExpired()){
+    if(deadTimer.isExpired()){
+      setColor(GOLDEN);
+      setColorOnFace(teamColor[lastConnectedTeam],deadFace%6);
+      deadFace++;
+        if(deadFace==13){
+          deadWaitTimer.set(DEAD_WAIT);
+          deadFace=0;
+        }
+      deadTimer.set(DEAD_DURATION);
+    }
+  }else{
+    setColor(GOLDEN);
+  }
+}
+
+void impactDisplay(){
+  if(rippleTimer.isExpired()){
+    nextFace++;
+    if(nextFace==4){
+      impactTimer.set(0);
+    }
+    rippleTimer.set(RIPPLE_TIME);
+  }
+  setColor(dim(teamColor[lastConnectedTeam],70));
+  switch(nextFace){
+    case 0:
+      setColorOnFace(teamColor[team],impactFace);
+      break;
+    case 1:
+      setColorOnFace(dim(teamColor[team],191),impactFace);
+      //new
+      setColorOnFace(teamColor[team],(impactFace+nextFace)%6);
+      setColorOnFace(teamColor[team],(impactFace+5)%6);
+      break;
+    case 2:
+      setColorOnFace(dim(teamColor[team],127),impactFace);
+      setColorOnFace(dim(teamColor[team],191),(impactFace+1)%6);
+      setColorOnFace(dim(teamColor[team],191),(impactFace+5)%6);
+      //new
+      setColorOnFace(teamColor[team],(impactFace+nextFace)%6);
+      setColorOnFace(teamColor[team],(impactFace+4)%6);
+      break;
+    case 3:
+      setColorOnFace(dim(teamColor[team],127),(impactFace+1)%6);
+      setColorOnFace(dim(teamColor[team],127),(impactFace+5)%6);
+      setColorOnFace(dim(teamColor[team],191),(impactFace+2)%6);
+      setColorOnFace(dim(teamColor[team],191),(impactFace+4)%6);
+      //new
+      setColorOnFace(teamColor[team],(impactFace+nextFace)%6);
+      break;
+  }
+}
+
 
 //team at [A], signalState at [C][D], blinkMode at [E][F]
 byte getBlinkMode(byte data) {
