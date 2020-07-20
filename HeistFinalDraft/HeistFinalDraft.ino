@@ -412,29 +412,29 @@ void impactDisplay(){
   setColor(dim(teamColor[lastConnectedTeam],70));
   switch(nextFace){
     case 0:
-      setColorOnFace(teamColor[team],impactFace);
+      setColorOnFace(teamColor[lastConnectedTeam],impactFace);
       break;
     case 1:
-      setColorOnFace(dim(teamColor[team],191),impactFace);
+      setColorOnFace(dim(teamColor[lastConnectedTeam],191),impactFace);
       //new
-      setColorOnFace(teamColor[team],(impactFace+nextFace)%6);
-      setColorOnFace(teamColor[team],(impactFace+5)%6);
+      setColorOnFace(teamColor[lastConnectedTeam],(impactFace+nextFace)%6);
+      setColorOnFace(teamColor[lastConnectedTeam],(impactFace+5)%6);
       break;
     case 2:
-      setColorOnFace(dim(teamColor[team],127),impactFace);
-      setColorOnFace(dim(teamColor[team],191),(impactFace+1)%6);
-      setColorOnFace(dim(teamColor[team],191),(impactFace+5)%6);
+      setColorOnFace(dim(teamColor[lastConnectedTeam],127),impactFace);
+      setColorOnFace(dim(teamColor[lastConnectedTeam],191),(impactFace+1)%6);
+      setColorOnFace(dim(teamColor[lastConnectedTeam],191),(impactFace+5)%6);
       //new
-      setColorOnFace(teamColor[team],(impactFace+nextFace)%6);
-      setColorOnFace(teamColor[team],(impactFace+4)%6);
+      setColorOnFace(teamColor[lastConnectedTeam],(impactFace+nextFace)%6);
+      setColorOnFace(teamColor[lastConnectedTeam],(impactFace+4)%6);
       break;
     case 3:
-      setColorOnFace(dim(teamColor[team],127),(impactFace+1)%6);
-      setColorOnFace(dim(teamColor[team],127),(impactFace+5)%6);
-      setColorOnFace(dim(teamColor[team],191),(impactFace+2)%6);
-      setColorOnFace(dim(teamColor[team],191),(impactFace+4)%6);
+      setColorOnFace(dim(teamColor[lastConnectedTeam],127),(impactFace+1)%6);
+      setColorOnFace(dim(teamColor[lastConnectedTeam],127),(impactFace+5)%6);
+      setColorOnFace(dim(teamColor[lastConnectedTeam],191),(impactFace+2)%6);
+      setColorOnFace(dim(teamColor[lastConnectedTeam],191),(impactFace+4)%6);
       //new
-      setColorOnFace(teamColor[team],(impactFace+nextFace)%6);
+      setColorOnFace(teamColor[lastConnectedTeam],(impactFace+nextFace)%6);
       break;
   }
 }
