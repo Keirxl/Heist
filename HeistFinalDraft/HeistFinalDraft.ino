@@ -6,12 +6,10 @@
 //                                                        I.. kill.. the bus driver
 //_________________________________________________________________________________
 
+#define IMPACT_OFFSET 50
+#define IMPACT_FADE 1000
 
-#define IMPACT_TIME 1500
-#define RIPPLE_TIME 90
-
-
-//COLORS 
+//COLORS
 #define VAULT makeColorHSB(200,50,70) //walls
 #define GOLDEN makeColorHSB(37,240,255)  //gold pieces
 #define GOLDHUE 37
@@ -21,7 +19,7 @@
 #define PALE makeColorHSB(200,50,70)
 
 
-//TOO MANY VARIABLES 
+//TOO MANY VARIABLES
 #define DAMAGE_DURATION 500 //time to flash on a hit
 #define DEAD_DURATION 120 //time to finish spin
 #define DEAD_WAIT 1500 //pause between spins
@@ -35,31 +33,31 @@
 #define PERIOD 2500
 
 //SIGNALS AND ENUMS AND STATE CHANGE OH MY!
-enum signalStates {INERT,RESET,RESOLVE};
+enum signalStates {INERT, RESET, RESOLVE};
 byte signalState = INERT;
-enum blinkModes {BANK,THEIF,DEAD};
-byte blinkMode=BANK;
-byte team=0;
+enum blinkModes {BANK, THEIF, DEAD};
+byte blinkMode = BANK;
+byte team = 0;
 
 
 //BYTES (and colors)
-Color teamColor[4]={teal,WHITE,mint,burntorange};
-byte ignoredFaces[6]={0,0,0,0,0,0};
-byte connectedFaces[6]={0,0,0,0,0,0}; //1 if attached
-byte theifOffFace=0;
-byte hp=HEALTH;
-byte lastConnectedTeam=0;
+Color teamColor[4] = {teal, WHITE, mint, burntorange};
+byte ignoredFaces[6] = {0, 0, 0, 0, 0, 0};
+byte connectedFaces[6] = {0, 0, 0, 0, 0, 0}; //1 if attached
+byte theifOffFace = 0;
+byte hp = HEALTH;
+byte lastConnectedTeam = 0;
 byte damageDim;
-byte deadFace=0;
+byte deadFace = 0;
 byte sparkleFace;
 byte sparkleSat;
-byte victoryFace=0;
+byte victoryFace = 0;
 byte dimness;
 byte impactFace;
-byte nextFace=0;
-byte complimentFace=4;
+byte nextFace = 0;
+byte complimentFace = 4;
 
-//TIMERS 
+//TIMERS
 Timer damageTimer;
 Timer deadTimer; //for Dead Display
 Timer deadWaitTimer; //for Dead Display
@@ -69,13 +67,12 @@ Timer wobbleTimer;
 Timer sparkleTimer;
 Timer sparkleFadeTimer;
 Timer impactTimer;
-Timer rippleTimer;
 
 //BOOLEANS BABY!
-bool isDead=false;
-bool isDecrease=false;
-bool isTroops=false;
-bool flipDirection=false;
+bool isDead = false;
+bool isDecrease = false;
+bool isTroops = false;
+bool flipDirection = false;
 
 
 
@@ -98,33 +95,33 @@ void loop() {
       break;
   }
 
-  
-  if(blinkMode==DEAD){
-    for(byte i=0;i<6;i++){
-      ignoredFaces[i]=1;
+
+  if (blinkMode == DEAD) {
+    for (byte i = 0; i < 6; i++) {
+      ignoredFaces[i] = 1;
     }
-    if(!finalDamageTimer.isExpired()){
+    if (!finalDamageTimer.isExpired()) {
       finalDamageDisplay();
-    }else{
-      victoryFace=0;
+    } else {
+      victoryFace = 0;
       deadDisplay();
       //deadSparkle();
       //setColor(GOLDEN);
     }
-  }else if(blinkMode==THEIF){
+  } else if (blinkMode == THEIF) {
     teamSet();
-  }else{
-    if(!impactTimer.isExpired()){
+  } else {
+    if (!impactTimer.isExpired()) {
       impactDisplay();
-      //damageDisplay(); 
-    }else if(hp<=HEALTH/2){
+      //damageDisplay();
+    } else if (hp <= HEALTH / 2) {
       wobbleDisplay();
-    }else{
+    } else {
       BANKDisplay();
     }
   }
-  
-  byte sendData= (team << 4)+(signalState << 2)+(blinkMode);
+
+  byte sendData = (team << 4) + (signalState << 2) + (blinkMode);
   setValueSentOnAllFaces(sendData);
 
   buttonLongPressed();
@@ -134,85 +131,84 @@ void loop() {
 
 //all the gameplay happens here
 void inertLoop() {
-  
+
   //set myself to RESET
   if (buttonMultiClicked()) {
-    byte clicks=buttonClickCount();
-    if(clicks==3){
+    byte clicks = buttonClickCount();
+    if (clicks == 3) {
       signalState = RESET;
     }
   }
 
   // Turn me into a THEIF
-  if(blinkMode!=THEIF){
-    if(buttonLongPressed()){
-      if(isAlone()){
-        blinkMode=THEIF;
-        team=0;
+  if (blinkMode != THEIF) {
+    if (buttonLongPressed()) {
+      if (isAlone()) {
+        blinkMode = THEIF;
+        team = 0;
         teamSet();
       }
     }
   }
 
   //Change Teams
-  if(blinkMode==THEIF){
-    if(buttonSingleClicked()){
+  if (blinkMode == THEIF) {
+    if (buttonSingleClicked()) {
       theifOffFace++;
-      if(theifOffFace>5){
-        theifOffFace=0;
+      if (theifOffFace > 5) {
+        theifOffFace = 0;
       }
     }
-    if(buttonDoubleClicked()){
-      if(isAlone()){
-          team++;
-          if(team==4){
-            team=0;
-          }
+    if (buttonDoubleClicked()) {
+      if (isAlone()) {
+        team++;
+        if (team == 4) {
+          team = 0;
+        }
         teamSet();
-       }
+      }
     }
   }
-    if(blinkMode==THEIF){
-      if(buttonLongPressed()){
-        if(isAlone()){
-          blinkMode=BANK;
-          hp=HEALTH;
-        }
+  if (blinkMode == THEIF) {
+    if (buttonLongPressed()) {
+      if (isAlone()) {
+        blinkMode = BANK;
+        hp = HEALTH;
       }
     }
-  
+  }
+
 
 
   // Look for Attackers Here
-  if(blinkMode==BANK){
-    FOREACH_FACE(f){
-      if(!isValueReceivedOnFaceExpired(f)){//am i connected?
-         if(getBlinkMode(getLastValueReceivedOnFace(f))==THEIF){// to a THEIF?
-            if(ignoredFaces[f]==0){//not an ignored face
-              hp--;
-              //damageTimer.set(DAMAGE_DURATION);
-              impactTimer.set(IMPACT_TIME);
-              rippleTimer.set(RIPPLE_TIME);
-              impactFace=f;
-              nextFace=0;
-              complimentFace=4;
-              lastConnectedTeam=getTeam(getLastValueReceivedOnFace(f));
-              if(hp<1){
-                finalDamageTimer.set(FINAL_DAMAGE_DURATION);
-                setColor(VAULT);
-                blinkMode=DEAD;
-              }
+  if (blinkMode == BANK) {
+    FOREACH_FACE(f) {
+      if (!isValueReceivedOnFaceExpired(f)) { //am i connected?
+        if (getBlinkMode(getLastValueReceivedOnFace(f)) == THEIF) { // to a THEIF?
+          if (ignoredFaces[f] == 0) { //not an ignored face
+            hp--;
+            //damageTimer.set(DAMAGE_DURATION);
+            impactTimer.set((IMPACT_OFFSET * 3) + IMPACT_FADE);
+            impactFace = f;
+            nextFace = 0;
+            complimentFace = 4;
+            lastConnectedTeam = getTeam(getLastValueReceivedOnFace(f));
+            if (hp < 1) {
+              finalDamageTimer.set(FINAL_DAMAGE_DURATION);
+              setColor(VAULT);
+              blinkMode = DEAD;
             }
-         }
-         if(getBlinkMode(getLastValueReceivedOnFace(f))!=DEAD){
-          ignoredFaces[f]=1;
-         }
-      }else{
-          ignoredFaces[f]=0;
+          }
+        }
+        if (getBlinkMode(getLastValueReceivedOnFace(f)) != DEAD) {
+          ignoredFaces[f] = 1;
+        }
+      } else {
+        ignoredFaces[f] = 0;
       }
     }
   }
-  
+
 
   //listen for neighbors in RESET
   FOREACH_FACE(f) {
@@ -227,10 +223,10 @@ void inertLoop() {
 void resetLoop() {
   signalState = RESOLVE;//I default to this at the start of the loop. Only if I see a problem does this not happen
 
-  blinkMode=BANK;
-  hp=HEALTH;
+  blinkMode = BANK;
+  hp = HEALTH;
   //hp=random(3)+3;
-  team=0;
+  team = 0;
 
   //look for neighbors who have not heard the RESET news
   FOREACH_FACE(f) {
@@ -257,185 +253,173 @@ void resolveLoop() {
 
 
 //same as BANKdisplay but it wobbles to show its at half health
-void wobbleDisplay(){
-  if(sparkleTimer.isExpired()){
-    sparkleFace=random(60)%6;
-    sparkleSat=random(40)+100;
-    sparkleTimer.set(random(300)+900);
+void wobbleDisplay() {
+  if (sparkleTimer.isExpired()) {
+    sparkleFace = random(60) % 6;
+    sparkleSat = random(40) + 100;
+    sparkleTimer.set(random(300) + 900);
   }
-  if(sparkleFadeTimer.isExpired()){
-     sparkleSat+=10;
-     if(sparkleSat>244){
-        sparkleSat=random(40)+100;
-     }
-     sparkleFadeTimer.set(SPARKLE_FADE);
+  if (sparkleFadeTimer.isExpired()) {
+    sparkleSat += 10;
+    if (sparkleSat > 244) {
+      sparkleSat = random(40) + 100;
+    }
+    sparkleFadeTimer.set(SPARKLE_FADE);
   }
 
-  breathe(70,180); 
-    
+  breathe(70, 180);
 
-  if(noBanksAround()){
-    setColor(makeColorHSB(GOLDHUE,240,255));
-    setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
-  }else{
-    FOREACH_FACE(f){
-      if(!isValueReceivedOnFaceExpired(f)){
-        if(getBlinkMode(getLastValueReceivedOnFace(f))==BANK){
-            connectedFaces[f]=1;
-            if(sparkleFace==f){
-                setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
-            }else{
-              setColorOnFace(GOLDEN,f);
-            }
-        }else{
-          connectedFaces[f]=0;
-          setColorOnFace(makeColorHSB(200,50,random(180-dimness)+dimness),f);
+
+  if (noBanksAround()) {
+    setColor(makeColorHSB(GOLDHUE, 240, 255));
+    setColorOnFace(makeColorHSB(GOLDHUE, sparkleSat, 255), sparkleFace);
+  } else {
+    FOREACH_FACE(f) {
+      if (!isValueReceivedOnFaceExpired(f)) {
+        if (getBlinkMode(getLastValueReceivedOnFace(f)) == BANK) {
+          connectedFaces[f] = 1;
+          if (sparkleFace == f) {
+            setColorOnFace(makeColorHSB(GOLDHUE, sparkleSat, 255), sparkleFace);
+          } else {
+            setColorOnFace(GOLDEN, f);
+          }
+        } else {
+          connectedFaces[f] = 0;
+          setColorOnFace(makeColorHSB(200, 50, random(180 - dimness) + dimness), f);
         }
-      }else{
-        connectedFaces[f]=0;
-        setColorOnFace(makeColorHSB(200,50,random(180-dimness)+dimness),f);
+      } else {
+        connectedFaces[f] = 0;
+        setColorOnFace(makeColorHSB(200, 50, random(180 - dimness) + dimness), f);
       }
     }
   }
 }
 
 
-void BANKDisplay(){
-  if(sparkleTimer.isExpired()){
-    sparkleFace=random(60)%6;
-    sparkleSat=random(40)+100;
-    sparkleTimer.set(random(300)+900);
+void BANKDisplay() {
+  if (sparkleTimer.isExpired()) {
+    sparkleFace = random(60) % 6;
+    sparkleSat = random(40) + 100;
+    sparkleTimer.set(random(300) + 900);
   }
-  if(sparkleFadeTimer.isExpired()){
-     sparkleSat+=10;
-     if(sparkleSat>255){
-        sparkleSat=random(40)+100;
-     }
-     sparkleFadeTimer.set(SPARKLE_FADE);
+  if (sparkleFadeTimer.isExpired()) {
+    sparkleSat += 10;
+    if (sparkleSat > 255) {
+      sparkleSat = random(40) + 100;
+    }
+    sparkleFadeTimer.set(SPARKLE_FADE);
   }
-    
 
-  if(noBanksAround()){
-    setColor(makeColorHSB(GOLDHUE,240,255));
-    setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
-  }else{
-    FOREACH_FACE(f){
-      if(!isValueReceivedOnFaceExpired(f)){
-        if(getBlinkMode(getLastValueReceivedOnFace(f))==BANK){
-            connectedFaces[f]=1;
-            if(sparkleFace==f){
-                setColorOnFace(makeColorHSB(GOLDHUE,sparkleSat,255),sparkleFace);
-            }else{
-              setColorOnFace(GOLDEN,f);
-            }
-        }else{
-          connectedFaces[f]=0;
-          setColorOnFace(VAULT,f);
+
+  if (noBanksAround()) {
+    setColor(makeColorHSB(GOLDHUE, 240, 255));
+    setColorOnFace(makeColorHSB(GOLDHUE, sparkleSat, 255), sparkleFace);
+  } else {
+    FOREACH_FACE(f) {
+      if (!isValueReceivedOnFaceExpired(f)) {
+        if (getBlinkMode(getLastValueReceivedOnFace(f)) == BANK) {
+          connectedFaces[f] = 1;
+          if (sparkleFace == f) {
+            setColorOnFace(makeColorHSB(GOLDHUE, sparkleSat, 255), sparkleFace);
+          } else {
+            setColorOnFace(GOLDEN, f);
+          }
+        } else {
+          connectedFaces[f] = 0;
+          setColorOnFace(VAULT, f);
         }
-      }else{
-        connectedFaces[f]=0;
-        setColorOnFace(VAULT,f);
+      } else {
+        connectedFaces[f] = 0;
+        setColorOnFace(VAULT, f);
       }
     }
   }
 }
 
-void damageDisplay(){
-  damageDim=damageTimer.getRemaining();
-  setColor(dim(teamColor[lastConnectedTeam],damageDim));
+void damageDisplay() {
+  damageDim = damageTimer.getRemaining();
+  setColor(dim(teamColor[lastConnectedTeam], damageDim));
 }
 
-void teamSet(){
-  breathe(180,255);
-  setColor(dim(teamColor[team],dimness));
-  setColorOnFace(OFF,theifOffFace);
-  setColorOnFace(OFF,(theifOffFace+3)%6);
+void teamSet() {
+  breathe(180, 255);
+  setColor(dim(teamColor[team], dimness));
+  setColorOnFace(OFF, theifOffFace);
+  setColorOnFace(OFF, (theifOffFace + 3) % 6);
 }
 
-void breathe(byte low, byte high){
-  byte breathProgress = map(millis()%PERIOD,0,PERIOD,0,255);
-  dimness = map(sin8_C(breathProgress),0,255,low,high);
+void breathe(byte low, byte high) {
+  byte breathProgress = map(millis() % PERIOD, 0, PERIOD, 0, 255);
+  dimness = map(sin8_C(breathProgress), 0, 255, low, high);
 }
 
-bool noBanksAround(){
-  byte bankNeighbors=0;
-  FOREACH_FACE(f){
+bool noBanksAround() {
+  byte bankNeighbors = 0;
+  FOREACH_FACE(f) {
     if (!isValueReceivedOnFaceExpired(f)) {//a neighbor!
       if (getBlinkMode(getLastValueReceivedOnFace(f)) == BANK) {
         bankNeighbors++;
       }
     }
   }
-  if(bankNeighbors==0){
+  if (bankNeighbors == 0) {
     return true;
-  }else{
+  } else {
     return false;
   }
 }
 
 
-void finalDamageDisplay(){
-    if(victoryTimer.isExpired()){
-      victoryFace++;
-      victoryTimer.set(VICTORY_LAP);
-    }
-  setColor(dim(teamColor[lastConnectedTeam],70));
-  setColorOnFace(teamColor[lastConnectedTeam],victoryFace%6);
+void finalDamageDisplay() {
+  if (victoryTimer.isExpired()) {
+    victoryFace++;
+    victoryTimer.set(VICTORY_LAP);
+  }
+  setColor(dim(teamColor[lastConnectedTeam], 70));
+  setColorOnFace(teamColor[lastConnectedTeam], victoryFace % 6);
 }
 
 //captured pieces spin
-void deadDisplay(){
-  if(deadWaitTimer.isExpired()){
-    if(deadTimer.isExpired()){
+void deadDisplay() {
+  if (deadWaitTimer.isExpired()) {
+    if (deadTimer.isExpired()) {
       setColor(GOLDEN);
-      setColorOnFace(teamColor[lastConnectedTeam],deadFace%6);
+      setColorOnFace(teamColor[lastConnectedTeam], deadFace % 6);
       deadFace++;
-        if(deadFace==13){
-          deadWaitTimer.set(DEAD_WAIT);
-          deadFace=0;
-        }
+      if (deadFace == 13) {
+        deadWaitTimer.set(DEAD_WAIT);
+        deadFace = 0;
+      }
       deadTimer.set(DEAD_DURATION);
     }
-  }else{
+  } else {
     setColor(GOLDEN);
   }
 }
 
-void impactDisplay(){
-  if(rippleTimer.isExpired()){
-    nextFace++;
-    if(nextFace==4){
-      impactTimer.set(0);
+void impactDisplay() {
+  int timeElapsed = ((IMPACT_OFFSET * 3) + IMPACT_FADE) - impactTimer.getRemaining();
+
+  FOREACH_FACE(f) {
+    //calculate group
+    byte group = 0;
+    if (abs(f - impactFace) == 1 || abs(f - impactFace) == 5) {
+      group = 1;
+    } else if (abs(f - impactFace) == 2 || abs(f - impactFace) == 4) {
+      group = 2;
+    } else if (abs(f - impactFace) == 3) {
+      group = 3;
     }
-    rippleTimer.set(RIPPLE_TIME);
-  }
-  setColor(dim(teamColor[lastConnectedTeam],70));
-  switch(nextFace){
-    case 0:
-      setColorOnFace(teamColor[lastConnectedTeam],impactFace);
-      break;
-    case 1:
-      setColorOnFace(dim(teamColor[lastConnectedTeam],191),impactFace);
-      //new
-      setColorOnFace(teamColor[lastConnectedTeam],(impactFace+nextFace)%6);
-      setColorOnFace(teamColor[lastConnectedTeam],(impactFace+5)%6);
-      break;
-    case 2:
-      setColorOnFace(dim(teamColor[lastConnectedTeam],127),impactFace);
-      setColorOnFace(dim(teamColor[lastConnectedTeam],191),(impactFace+1)%6);
-      setColorOnFace(dim(teamColor[lastConnectedTeam],191),(impactFace+5)%6);
-      //new
-      setColorOnFace(teamColor[lastConnectedTeam],(impactFace+nextFace)%6);
-      setColorOnFace(teamColor[lastConnectedTeam],(impactFace+4)%6);
-      break;
-    case 3:
-      setColorOnFace(dim(teamColor[lastConnectedTeam],127),(impactFace+1)%6);
-      setColorOnFace(dim(teamColor[lastConnectedTeam],127),(impactFace+5)%6);
-      setColorOnFace(dim(teamColor[lastConnectedTeam],191),(impactFace+2)%6);
-      setColorOnFace(dim(teamColor[lastConnectedTeam],191),(impactFace+4)%6);
-      //new
-      setColorOnFace(teamColor[lastConnectedTeam],(impactFace+nextFace)%6);
-      break;
+
+    //calculate brightness
+    //should I be on?
+    byte brightness = 70;
+    if (timeElapsed > (IMPACT_OFFSET * group)) {
+      brightness = max(255 - map(timeElapsed, IMPACT_OFFSET * group, (IMPACT_OFFSET * group) + IMPACT_FADE, 0, 185), 0);
+    }
+
+    //actually set the face lights
+    setColorOnFace(dim(teamColor[lastConnectedTeam], brightness), f);
   }
 }
 
