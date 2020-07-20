@@ -116,6 +116,7 @@ void loop() {
   }else{
     if(!impactTimer.isExpired()){
       impactDisplay();
+      //damageDisplay(); 
     }else if(hp<=HEALTH/2){
       wobbleDisplay();
     }else{
