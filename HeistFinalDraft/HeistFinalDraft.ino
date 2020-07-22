@@ -6,8 +6,8 @@
 //                                                        I.. kill.. the bus driver
 //_________________________________________________________________________________
 
-#define IMPACT_OFFSET 50
-#define IMPACT_FADE 1000
+#define IMPACT_OFFSET 100
+#define IMPACT_FADE 650
 
 //COLORS
 #define VAULT makeColorHSB(200,50,70) //walls
