@@ -17,6 +17,7 @@
 #define teal makeColorHSB(100,255,255)
 #define mint makeColorHSB(75,220,255)
 #define PALE makeColorHSB(200,50,70)
+#define purple makeColorHSB(200,220,255)
 
 
 //TOO MANY VARIABLES
@@ -31,6 +32,7 @@
 #define PULSE_LENGTH 2000
 #define HEALTH 4
 #define PERIOD 2500
+#define INDEX 1000
 
 //SIGNALS AND ENUMS AND STATE CHANGE OH MY!
 enum signalStates {INERT, RESET, RESOLVE};
@@ -41,7 +43,7 @@ byte team = 0;
 
 
 //BYTES (and colors)
-Color teamColor[4] = {teal, WHITE, mint, burntorange};
+Color teamColor[4] = {teal, purple, mint, burntorange};
 byte ignoredFaces[6] = {0, 0, 0, 0, 0, 0};
 byte connectedFaces[6] = {0, 0, 0, 0, 0, 0}; //1 if attached
 byte theifOffFace = 0;
@@ -56,6 +58,7 @@ byte dimness;
 byte impactFace;
 byte nextFace = 0;
 byte complimentFace = 4;
+byte wobbleDim;
 
 //TIMERS
 Timer damageTimer;
@@ -63,7 +66,6 @@ Timer deadTimer; //for Dead Display
 Timer deadWaitTimer; //for Dead Display
 Timer finalDamageTimer;
 Timer victoryTimer;
-Timer wobbleTimer;
 Timer sparkleTimer;
 Timer sparkleFadeTimer;
 Timer impactTimer;
@@ -109,7 +111,11 @@ void loop() {
       //setColor(GOLDEN);
     }
   } else if (blinkMode == THEIF) {
-    teamSet();
+    if (!impactTimer.isExpired()){
+      theifImpact();
+    }else{
+      teamSet();
+    }
   } else {
     if (!impactTimer.isExpired()) {
       impactDisplay();
@@ -142,7 +148,7 @@ void inertLoop() {
 
   // Turn me into a THEIF
   if (blinkMode != THEIF) {
-    if (buttonLongPressed()) {
+    if (buttonDoubleClicked()) {
       if (isAlone()) {
         blinkMode = THEIF;
         team = 0;
@@ -178,6 +184,21 @@ void inertLoop() {
     }
   }
 
+  if(blinkMode==THEIF){
+    FOREACH_FACE(f) {
+      if (!isValueReceivedOnFaceExpired(f)) {//a neighbor!
+        if (getBlinkMode(getLastValueReceivedOnFace(f)) != THEIF) {
+          if(ignoredFaces[f]==0){
+            impactTimer.set(INDEX);
+          }
+        }
+  
+        ignoredFaces[f]=1;
+      }else{
+        ignoredFaces[f]=0;
+      }
+    }
+  }
 
 
   // Look for Attackers Here
@@ -251,6 +272,7 @@ void resolveLoop() {
   }
 }
 
+  
 
 //same as BANKdisplay but it wobbles to show its at half health
 void wobbleDisplay() {
@@ -267,8 +289,7 @@ void wobbleDisplay() {
     sparkleFadeTimer.set(SPARKLE_FADE);
   }
 
-  breathe(70, 180);
-
+  breathe(100,230);
 
   if (noBanksAround()) {
     setColor(makeColorHSB(GOLDHUE, 240, 255));
@@ -285,11 +306,11 @@ void wobbleDisplay() {
           }
         } else {
           connectedFaces[f] = 0;
-          setColorOnFace(makeColorHSB(200, 50, random(180 - dimness) + dimness), f);
+          setColorOnFace(makeColorHSB(200, 50,dimness), f);
         }
       } else {
         connectedFaces[f] = 0;
-        setColorOnFace(makeColorHSB(200, 50, random(180 - dimness) + dimness), f);
+        setColorOnFace(makeColorHSB(200, 50,dimness),f);
       }
     }
   }
@@ -352,6 +373,7 @@ void breathe(byte low, byte high) {
   byte breathProgress = map(millis() % PERIOD, 0, PERIOD, 0, 255);
   dimness = map(sin8_C(breathProgress), 0, 255, low, high);
 }
+
 
 bool noBanksAround() {
   byte bankNeighbors = 0;
@@ -437,6 +459,18 @@ void impactDisplay() {
     //actually set the face lights
     setColorOnFace(dim(teamColor[lastConnectedTeam], brightness), f);
   }
+}
+
+void theifImpact(){
+  byte breathProgress = map(impactTimer.getRemaining(),0,INDEX,0,255);
+  //dimness = map(sin8_C(breathProgress),0,255,127,255);
+  byte flashDim = breathProgress;
+
+  breathe(180, 255);
+  
+  setColor(dim(teamColor[team], dimness));
+  setColorOnFace(dim(GOLDEN,flashDim),theifOffFace);
+  setColorOnFace(dim(GOLDEN,flashDim),(theifOffFace + 3) % 6);
 }
 
 
