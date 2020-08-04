@@ -23,7 +23,7 @@
 #define DAMAGE_DURATION 500 //time to flash on a hit
 #define DEAD_DURATION 120 //time to finish spin
 #define DEAD_WAIT 1500 //pause between spins
-#define FINAL_DAMAGE_DURATION 1500
+#define FINAL_DAMAGE_DURATION 2500
 #define WOBBLE_DURATION 75
 #define VICTORY_LAP  50 //time for team to lap the gold piece
 #define SPARKLE_DURATION 1000
@@ -51,7 +51,7 @@ byte damageDim;
 byte deadFace = 0;
 byte sparkleFace;
 byte sparkleSat;
-byte victoryFace = 0;
+byte victoryFace = 2;
 byte dimness;
 byte impactFace;
 byte nextFace = 0;
@@ -103,7 +103,7 @@ void loop() {
     if (!finalDamageTimer.isExpired()) {
       finalDamageDisplay();
     } else {
-      victoryFace = 0;
+      victoryFace = 2;
       deadDisplay();
       //deadSparkle();
       //setColor(GOLDEN);
@@ -371,12 +371,28 @@ bool noBanksAround() {
 
 
 void finalDamageDisplay() {
-  if (victoryTimer.isExpired()) {
-    victoryFace++;
-    victoryTimer.set(VICTORY_LAP);
+  if (finalDamageTimer.getRemaining() > 1000) {//initial fast spin
+    if (victoryTimer.isExpired()) {
+      victoryFace++;
+      victoryTimer.set(VICTORY_LAP);
+    }
+    setColor(dim(teamColor[lastConnectedTeam], 70));
+  } else {
+    //we're gonna map between VICTORY_LAP and DEAD_DURATION)
+    int spinDuration = map(1000 - finalDamageTimer.getRemaining(), 0, 1000, VICTORY_LAP, DEAD_DURATION);
+    if (victoryTimer.isExpired()) {
+      victoryFace++;
+      victoryTimer.set(spinDuration);
+    }
+
+    //then also we're gonna fade up the golden
+    byte goldenBrightness = map(1000 - finalDamageTimer.getRemaining(), 0, 1000, 70, 255);
+    setColor(dim(GOLDEN, goldenBrightness));
   }
-  setColor(dim(teamColor[lastConnectedTeam], 70));
+
   setColorOnFace(teamColor[lastConnectedTeam], victoryFace % 6);
+  //make sure the other animation is synced
+  //deadFace = victoryFace;
 }
 
 //captured pieces spin
