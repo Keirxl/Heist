@@ -363,8 +363,7 @@ void damageDisplay() {
 }
 
 void teamSet() {
-  breathe(180, 255);
-  setColor(dim(teamColor[team], dimness));
+  setColor(teamColor[team]);
   setColorOnFace(OFF, theifOffFace);
   setColorOnFace(OFF, (theifOffFace + 3) % 6);
 }
@@ -465,10 +464,8 @@ void theifImpact(){
   byte breathProgress = map(impactTimer.getRemaining(),0,INDEX,0,255);
   //dimness = map(sin8_C(breathProgress),0,255,127,255);
   byte flashDim = breathProgress;
-
-  breathe(180, 255);
   
-  setColor(dim(teamColor[team], dimness));
+  setColor(teamColor[team]);
   setColorOnFace(dim(GOLDEN,flashDim),theifOffFace);
   setColorOnFace(dim(GOLDEN,flashDim),(theifOffFace + 3) % 6);
 }
